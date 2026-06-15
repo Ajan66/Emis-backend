@@ -1,0 +1,37 @@
+import { Router } from "express";
+import multer from "multer";
+import Anthropic from "@anthropic-ai/sdk";
+
+const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
+const client = new Anthropic();
+
+router.post("/api/upload", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const base64 = req.file.buffer.toString("base64");
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1024,
+      messages: [{
+        role: "user",
+        content: [{
+          type: "image",
+          source: { type: "base64", media_type: "image/jpeg", data: base64 }
+        }, {
+          type: "text",
+          text: "Extract student marks from this mark register. Return JSON with: {students: [{roll_number, name, marks: {subject: score}}]}"
+        }]
+      }]
+    });
+    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    const clean = text.replace(/```json|```/g, "").trim();
+    res.json(JSON.parse(clean));
+  } catch (err) {
+    res.status(500).json({ error: "Failed to process image" });
+  }
+});
+
+export default router;
