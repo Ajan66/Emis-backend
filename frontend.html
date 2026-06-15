@@ -43,6 +43,18 @@ document.getElementById('fileInput').onchange = function(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = document.getElementById('preview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    img.style.maxWidth = '100%';
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('extractBtn').style.display = 'block';
+};
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
   reader.onload = function(e) {
     const img = document.getElementById('preview');
     img.src = e.target.result;
