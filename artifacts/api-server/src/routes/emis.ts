@@ -1,22 +1,26 @@
 import { Router, Request, Response } from 'express';
-
 import puppeteer from 'puppeteer';
 import multer from 'multer';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-
 /**
  * 1. CLAUDE VISION ANALYSIS ENDPOINT
- * Receives the marks picture, forces Claude to output structured JSON array
  */
-    // OpenRouter மூலம் AI-ஐ அழைக்கிறோம்
+router.post('/analyze', upload.single('image'), async (req: Request, res: Response): Promise<any> => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const base64Image = req.file.buffer.toString('base64');
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.ANTHROPIC_API_KEY}`,
-        "HTTP-Referer": "https://emis-backend-qt8l.onrender.com", // உங்கள் ஆப்பின் URL-ஐ இங்கே கொடுங்கள்
+        "HTTP-Referer": "https://emis-backend-qt8l.onrender.com",
         "X-Title": "EMIS Teacher App",
         "Content-Type": "application/json"
       },
@@ -26,7 +30,7 @@ const upload = multer({ storage: multer.memoryStorage() });
           {
             "role": "user",
             "content": [
-              { "type": "text", "text": "இந்த மார்க்ஷீட்டில் உள்ள மாணவர் பெயர் மற்றும் மதிப்பெண்களை மட்டும் JSON வடிவில் கொடு." },
+              { "type": "text", "text": "Extract student roll/admission numbers, student names, and their exam marks. Output ONLY a raw JSON array of objects. Format: [{\"student_id\": \"string\", \"student_name\": \"string\", \"marks\": \"string\"}]. No markdown, no conversational text." },
               { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Image}` } }
             ]
           }
@@ -35,42 +39,14 @@ const upload = multer({ storage: multer.memoryStorage() });
     });
 
     const result = await response.json();
-    
-    // AI கொடுத்த பதிலை எடுக்கிறோம்
     const extractedData = result.choices[0].message.content;
+    
+    // JSON மட்டும் பிரித்தெடுக்க
+    const tableData = JSON.parse(extractedData.replace(/```json/g, '').replace(/
+```/g, '').trim());
 
-    // இதை உங்கள் ஆப்பிற்கு அனுப்பி வைக்கிறோம்
-    return res.json({ success: true, data: extractedData });
-
-
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1500,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: 'image/jpeg',
-                data: base64Image,
-              },
-            },
-            {
-              type: 'text',
-              text: 'Extract student roll/admission numbers, student names, and their exam marks. Output ONLY a raw JSON array of objects. Format: [{"student_id": "string", "student_name": "string", "marks": "string"}]. Do not wrap the response in markdown blocks or write conversational text.',
-            },
-          ],
-        },
-      ],
-    });
-
-    const cleanJsonText = message.content[0].type === 'text' ? message.content[0].text.trim() : '';
-    const tableData = JSON.parse(cleanJsonText);
-
-    return res.json({ success: true, tableData });
+    return res.json({ success: true, data: tableData });
+    
   } catch (error: any) {
     console.error('Claude Vision Processing Failed:', error);
     return res.status(500).json({ success: false, error: 'Failed to process table image.' });
@@ -79,7 +55,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * 2. PUPPETEER AUTOMATION PUSH ENDPOINT
- * Triggers only when your user taps "OK" on the web screen grid
  */
 router.post('/push', async (req: Request, res: Response): Promise<any> => {
   const { username, password, verifiedData } = req.body;
@@ -96,21 +71,16 @@ router.post('/push', async (req: Request, res: Response): Promise<any> => {
   const page = await browser.newPage();
 
   try {
-    // Navigate to canonical Tamil Nadu EMIS entry gate
     await page.goto('https://emis.tnschools.gov.in/', { waitUntil: 'networkidle2' });
-
-    // Login Form Automation Input
-    await page.type('#user_name' || '#username', username); 
+    await page.type('#user_name', username); 
     await page.type('#password', password);
-    await page.click('#login_submit_btn' || 'button[type="submit"]');
+    await page.click('#login_submit_btn');
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-    // Loop data inputs field-by-field safely based on verified student layouts
     for (const row of verifiedData) {
-      // Dynamic input selectors based on EMIS school dashboard IDs
       const selector = `input[data-student-id="${row.student_id}"]`;
       if ((await page.$(selector)) !== null) {
-        await page.click(selector, { clickCount: 3 }); // clear defaults
+        await page.click(selector, { clickCount: 3 });
         await page.type(selector, row.marks.toString());
       }
     }
