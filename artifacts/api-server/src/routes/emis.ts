@@ -79,7 +79,8 @@ router.post('/push', async (req: Request, res: Response): Promise<any> => {
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
   for (const row of verifiedData) {
-  const selector = `input[data-student-id="${row.student_id}"]`;
+  const selector = "input[data-student-id=\"" + row.student_id + "\"]";
+
 
 
   if ((await page.$(selector)) !== null) {
