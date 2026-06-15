@@ -42,7 +42,8 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
     const extractedData = result.choices[0].message.content;
     
     // JSON மட்டும் பிரித்தெடுக்க
-    const tableData = JSON.parse(extractedData.replace(/```json/g, '').replace(/
+    const tableData = JSON.parse(extractedData.replace(/```json/g, '').replace(/```/g, '').trim());
+
 ```/g, '').trim());
 
     return res.json({ success: true, data: tableData });
