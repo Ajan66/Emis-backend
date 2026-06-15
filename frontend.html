@@ -37,7 +37,7 @@ img{max-width:100%;border-radius:8px;margin:10px 0}
 <div id="result"></div>
 
 <script>
-const API = 'https://emis-backend-qt8l.onrender.com';
+const API = 'https://emis-simple.onrender.com';
 
 document.getElementById('fileInput').onchange = function(e) {
   const file = e.target.files[0];
@@ -62,7 +62,7 @@ async function extractMarks() {
   formData.append('file', file);
   
   try {
-    const res = await fetch(API + '/api/upload', {method:'POST', body:formData});
+    const res = await fetch(API + '/upload',
     const data = await res.json();
     
     if (data.error) {
