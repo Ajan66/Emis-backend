@@ -1,23 +1,47 @@
 import { Router, Request, Response } from 'express';
-import { Anthropic } from '@anthropic-ai/sdk';
+
 import puppeteer from 'puppeteer';
 import multer from 'multer';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
 
 /**
  * 1. CLAUDE VISION ANALYSIS ENDPOINT
  * Receives the marks picture, forces Claude to output structured JSON array
  */
-router.post('/analyze', upload.single('image'), async (req: Request, res: Response): Promise<any> => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'Please upload an image file.' });
-    }
+    // OpenRouter மூலம் AI-ஐ அழைக்கிறோம்
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.ANTHROPIC_API_KEY}`,
+        "HTTP-Referer": "https://emis-backend-qt8l.onrender.com", // உங்கள் ஆப்பின் URL-ஐ இங்கே கொடுங்கள்
+        "X-Title": "EMIS Teacher App",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "model": "anthropic/claude-3.5-sonnet",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              { "type": "text", "text": "இந்த மார்க்ஷீட்டில் உள்ள மாணவர் பெயர் மற்றும் மதிப்பெண்களை மட்டும் JSON வடிவில் கொடு." },
+              { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Image}` } }
+            ]
+          }
+        ]
+      })
+    });
 
-    const base64Image = req.file.buffer.toString('base64');
+    const result = await response.json();
+    
+    // AI கொடுத்த பதிலை எடுக்கிறோம்
+    const extractedData = result.choices[0].message.content;
+
+    // இதை உங்கள் ஆப்பிற்கு அனுப்பி வைக்கிறோம்
+    return res.json({ success: true, data: extractedData });
+
 
     const message = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
