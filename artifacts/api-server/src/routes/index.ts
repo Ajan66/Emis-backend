@@ -1,12 +1,12 @@
 import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import uploadRouter from "./upload";
-import emisRouter from "./emis"; // <-- Imports your new EMIS logic
+import healthRouter from "./health.js";
+import uploadRouter from "./upload.js";
+import emisRouter from "./emis.js";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(uploadRouter);
-router.use(emisRouter); // <-- Makes the /analyze and /push paths live
+router.use(emisRouter);
 
 export default router;
