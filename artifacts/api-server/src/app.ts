@@ -26,16 +26,16 @@ app.use(
   }),
 );
 
-// Modified CORS configuration to specifically trust your frontend
 app.use(cors({
   origin: "https://ajan66.github.io",
   methods: ["GET", "POST", "OPTIONS"],
   credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // Increased limit for image uploads
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-app.use("/", router); // Ensure this matches your route definitions
+// Change this back to "/api" to match your request path "/api/analyze"
+app.use("/api", router); 
 
 export default app;
