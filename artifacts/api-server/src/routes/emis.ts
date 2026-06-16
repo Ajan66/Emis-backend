@@ -44,7 +44,7 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
     // JSON மட்டும் பிரித்தெடுக்க
     const tableData = JSON.parse(extractedData.replace(/```json/g, '').replace(/```/g, '').trim());
 
-```/g, '').trim());
+
 
     return res.json({ success: true, data: tableData });
     
@@ -79,7 +79,8 @@ router.post('/push', async (req: Request, res: Response): Promise<any> => {
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
 for (const row of verifiedData) {
-  const selector =  + "" + input[data-student-id="${row.student_id}"] + "" + ;
+  const selector = `input[data-student-id="${row.student_id}"]`;
+
   if ((await page.$(selector)) !== null) {
     await page.click(selector, { clickCount: 3 });
     await page.type(selector, row.marks.toString());
