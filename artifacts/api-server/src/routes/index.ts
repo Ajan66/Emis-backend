@@ -1,7 +1,7 @@
 import { Router } from "express";
 import healthRouter from "./health.js";
 import emisRouter from "./emis.js";
-import uploadRouter from "./upload.js";
+import uploadRouter from "./upload"; // Removed .js extension
 
 const router = Router();
 
