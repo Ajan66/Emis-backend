@@ -88,6 +88,7 @@ for (const row of verifiedData) {
 
 
 
+
 await browser.close();
 return res.json({ success: true, message: 'Marks pushed successfully!' });
 } catch (automationErr: any) {
