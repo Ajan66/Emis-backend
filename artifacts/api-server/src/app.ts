@@ -25,10 +25,17 @@ app.use(
     },
   }),
 );
-app.use(cors());
+
+// Modified CORS configuration to specifically trust your frontend
+app.use(cors({
+  origin: "https://ajan66.github.io",
+  methods: ["GET", "POST", "OPTIONS"],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router);
+app.use("/", router); // Ensure this matches your route definitions
 
 export default app;
