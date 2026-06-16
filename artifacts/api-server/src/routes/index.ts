@@ -1,12 +1,13 @@
-import { Router, type IRouter } from "express";
+import { Router } from "express";
 import healthRouter from "./health.js";
 import emisRouter from "./emis.js";
-import uploadRouter from "./upload.js"; // Import the missing router
+import uploadRouter from "./upload.js";
 
-const router: IRouter = Router();
+const router = Router();
 
+// Register the sub-routers
 router.use(healthRouter);
 router.use(emisRouter);
-router.use(uploadRouter); // Add this to register your upload/analyze routes
+router.use(uploadRouter);
 
 export default router;
