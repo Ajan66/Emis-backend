@@ -78,9 +78,10 @@ router.post('/push', async (req: Request, res: Response): Promise<any> => {
     await page.click('#login_submit_btn');
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-  for (const row of verifiedData) {
-      constselector = `input[data-student-id="${row.student_id}"]`;
+  for for (const row of verifiedData) {
+  const selector = `input[data-student-id="${row.student_id}"]`;
   if ((await page.$(selector)) !== null) {
+
     await page.click(selector, { clickCount: 3 });
     await page.type(selector, row.marks.toString());
   }
