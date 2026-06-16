@@ -82,26 +82,23 @@ for (const row of verifiedData) {
   const selector = `input[data-student-id="${row.student_id}"]`;
 
 
-  if ((await page.$(selector)) !== null) {
-    await page.click(selector, { clickCount: 3 });
-    await page.type(selector, row.marks.toString());
-  }
-}
+     for (const row of verifiedData) {
+      const selector = `input[data-student-id="${row.student_id}"]`;
+      if ((await page.$(selector)) !== null) {
+        await page.click(selector, { clickCount: 3 });
+        await page.type(selector, row.marks.toString());
+      }
+    }
 
+    await browser.close();
+    return res.json({ success: true, message: 'Marks pushed successfully!' });
 
-
-
-
-
-
-return res.json({ success: true, message: 'Marks pushed successfully!' });
-} catch (automationErr: any) {
-  console.error('Automation Routine Failed:', automationErr);
-  await browser.close();
-  return res.status(500).json({ success: false, error: 'Browser automation runtime failure.' });
-}
-
+  } catch (automationErr: any) {
+    console.error('Automation Routine Failed:', automationErr);
+    if (browser) await browser.close();
+    return res.status(500).json({ success: false, error: 'Browser automation runtime failure.' });
   }
 });
 
 export default router;
+
