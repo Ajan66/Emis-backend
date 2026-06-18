@@ -32,10 +32,10 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json({ limit: '10mb' })); // Increased limit for image uploads
+app.use(express.json({ limit: '10mb' })); 
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Change this back to "/api" to match your request path "/api/analyze"
+// API ரவுட்டர்களை இணைக்கும் பகுதி
 app.use("/api", router); 
 
 export default app;
