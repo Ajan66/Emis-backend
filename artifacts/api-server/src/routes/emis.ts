@@ -1,10 +1,3 @@
-import { Router, Request, Response } from 'express';
-import puppeteer from 'puppeteer';
-import multer from 'multer';
-
-const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
-
 router.post('/analyze', upload.single('image'), async (req: Request, res: Response): Promise<any> => {
   try {
     if (!req.file) {
@@ -27,47 +20,24 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
     });
 
     const result = await response.json();
-    const extractedData = result.choices[0].message.content;
-    const tableData = JSON.parse(extractedData.replace(/```json/g, '').replace(/```/g, '').trim());
 
-    return res.json({ success: true, data: tableData });
+    // இங்கே பாதுகாப்பான சரிபார்ப்பு (Safe check) சேர்க்கப்பட்டுள்ளது:
+    if (result && result.choices && result.choices.length > 0 && result.choices[0].message) {
+      const extractedData = result.choices[0].message.content;
+      
+      // JSON-ஐ சுத்தப்படுத்துதல்
+      const cleanData = extractedData.replace(/```json/g, '').replace(/
+```/g, '').trim();
+      const tableData = JSON.parse(cleanData);
+
+      return res.json({ success: true, data: tableData });
+    } else {
+      console.error('OpenRouter Response Error:', result);
+      return res.status(500).json({ success: false, error: 'AI model did not return a valid response.' });
+    }
+
   } catch (error: any) {
     console.error('Claude Vision Processing Failed:', error);
     return res.status(500).json({ success: false, error: 'Failed to process table image.' });
   }
 });
-
-router.post('/push', async (req: Request, res: Response): Promise<any> => {
-  const { username, password, verifiedData } = req.body;
-  if (!username || !password || !verifiedData) {
-    return res.status(400).json({ success: false, error: 'Missing mandatory fields.' });
-  }
-
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-  const page = await browser.newPage();
-
-  try {
-    await page.goto('https://emis.tnschools.gov.in/', { waitUntil: 'networkidle2' });
-    await page.type('#user_name', username);
-    await page.type('#password', password);
-    await page.click('#login_submit_btn');
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });
-
-    for (const row of verifiedData) {
-      const selector = `input[data-student-id="${row.student_id}"]`;
-      if ((await page.$(selector)) !== null) {
-        await page.click(selector, { clickCount: 3 });
-        await page.type(selector, row.marks.toString());
-      }
-    }
-
-    await browser.close();
-    return res.json({ success: true, message: 'Marks pushed successfully!' });
-  } catch (automationErr: any) {
-    console.error('Automation Routine Failed:', automationErr);
-    if (browser) await browser.close();
-    return res.status(500).json({ success: false, error: 'Browser automation runtime failure.' });
-  }
-});
-
-export default router;
