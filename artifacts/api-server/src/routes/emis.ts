@@ -21,13 +21,11 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
 
     const result = await response.json();
 
-    // இங்கே பாதுகாப்பான சரிபார்ப்பு (Safe check) சேர்க்கப்பட்டுள்ளது:
     if (result && result.choices && result.choices.length > 0 && result.choices[0].message) {
       const extractedData = result.choices[0].message.content;
       
-      // JSON-ஐ சுத்தப்படுத்துதல்
-      const cleanData = extractedData.replace(/```json/g, '').replace(/
-```/g, '').trim();
+      // பிழை ஏற்படாமல் இருக்க replace பங்க்ஷனை ஒரே வரியில் மாற்றியுள்ளேன்
+      const cleanData = extractedData.replace(/```json/g, '').replace(/```/g, '').trim();
       const tableData = JSON.parse(cleanData);
 
       return res.json({ success: true, data: tableData });
