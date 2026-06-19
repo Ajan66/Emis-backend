@@ -24,13 +24,13 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
     if (result && result.choices && result.choices.length > 0 && result.choices[0].message) {
       const extractedData = result.choices[0].message.content;
       
-      // பிழை ஏற்படாமல் இருக்க replace பங்க்ஷனை ஒரே வரியில் மாற்றியுள்ளேன்
+      // இந்த வரி இப்போது ஒரே வரியில் உள்ளது, பிழை வராது
       const cleanData = extractedData.replace(/```json/g, '').replace(/```/g, '').trim();
       const tableData = JSON.parse(cleanData);
 
       return res.json({ success: true, data: tableData });
     } else {
-      console.error('OpenRouter Response Error:', result);
+      console.error('OpenRouter Response Error:', JSON.stringify(result));
       return res.status(500).json({ success: false, error: 'AI model did not return a valid response.' });
     }
 
