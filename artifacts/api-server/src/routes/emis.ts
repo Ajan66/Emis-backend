@@ -23,9 +23,8 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
 
     if (result && result.choices && result.choices.length > 0 && result.choices[0].message) {
       const extractedData = result.choices[0].message.content;
-      
-      // இந்த வரி இப்போது ஒரே வரியில் உள்ளது, பிழை வராது
-      const cleanData = extractedData.replace(/```json/g, '').replace(/```/g, '').trim();
+      const cleanData = extractedData.replace(/```json/g, '').replace(/
+```/g, '').trim();
       const tableData = JSON.parse(cleanData);
 
       return res.json({ success: true, data: tableData });
