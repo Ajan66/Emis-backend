@@ -1,3 +1,9 @@
+import express, { Request, Response } from 'express';
+import multer from 'multer';
+
+const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
+
 router.post('/analyze', upload.single('image'), async (req: Request, res: Response): Promise<any> => {
   try {
     if (!req.file) {
@@ -33,3 +39,5 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
     return res.status(500).json({ success: false, error: 'Failed to process table image.' });
   }
 });
+
+export default router;
