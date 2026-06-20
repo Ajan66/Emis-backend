@@ -23,19 +23,13 @@ router.post('/analyze', upload.single('image'), async (req: Request, res: Respon
 
     if (result && result.choices && result.choices.length > 0 && result.choices[0].message) {
       const extractedData = result.choices[0].message.content;
-      
-      // இந்த வரி ஒரே வரியில் உள்ளது, பிழை வராது
       const cleanData = extractedData.replace(/```json/g, '').replace(/```/g, '').trim();
       const tableData = JSON.parse(cleanData);
-
       return res.json({ success: true, data: tableData });
     } else {
-      console.error('OpenRouter Response Error:', JSON.stringify(result));
       return res.status(500).json({ success: false, error: 'AI model did not return a valid response.' });
     }
-
   } catch (error: any) {
-    console.error('Claude Vision Processing Failed:', error);
     return res.status(500).json({ success: false, error: 'Failed to process table image.' });
   }
 });
