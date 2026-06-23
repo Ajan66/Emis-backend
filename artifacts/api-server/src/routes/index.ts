@@ -1,17 +1,20 @@
-import { Router } from "express";
-import healthRouter from "./health";
-import emisRouter from "./emis";
-import uploadRouter from "./upload";
+import express from 'express';
+import cors from 'cors';
+import router from './routes/index'; // உங்கள் routes கோப்புறையில் உள்ள index.ts-ஐ இறக்குமதி செய்கிறது
 
-const router = Router();
+const app = express();
 
-// Register the sub-routers
-router.use("/health", healthRouter);
+// CORS பிழை வராமல் இருக்க
+app.use(cors());
 
-// emisRouter-ஐ நேரடியாக ரூட் (/) பாதையில் இணைக்கவும், 
-// அப்போதுதான் அது /analyze போன்ற ரவுட்டர்களை ஏற்கும்
-router.use("/", emisRouter); 
+// JSON தரவுகளைப் படிக்க
+app.use(express.json());
 
-router.use("/upload", uploadRouter);
+// முக்கியமான வரி: இங்கே '/' என்று கொடுத்தால், 
+// உங்கள் routes/index.ts-இல் உள்ள பாதைகள் அப்படியே செயல்படும்.
+app.use('/', router); 
 
-export default router;
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
