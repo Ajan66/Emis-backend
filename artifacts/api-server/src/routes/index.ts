@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-// src/routes/index.ts கோப்பை இறக்குமதி செய்ய
+// உங்கள் கோப்பு அமைப்பு src/routes/index.ts என்று இருப்பதால், இந்த பாதை சரியானது
 import router from './routes/index'; 
 
 const app = express();
 
-// CORS பிழை வராமல் இருக்க (Frontend-லிருந்து கோரிக்கைகளை ஏற்க)
+// CORS பிழை வராமல் இருக்க
 app.use(cors());
 
 // JSON தரவுகளைப் படிக்க
