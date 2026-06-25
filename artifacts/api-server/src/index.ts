@@ -1,14 +1,16 @@
-import express from "express"; // எக்ஸ்பிரஸ்ஸை இம்போர்ட் செய்யவும்
-import app from "./app.js";    // ./app.js என மாற்றவும்
-import { logger } from "./lib/logger.js"; // ./lib/logger.js என மாற்றவும்
+import express from "express";
+import app from "./app.js";
+import { logger } from "./lib/logger.js";
 import cors from "cors";
+import router from "./routes/index.js"; // routes இம்போர்ட் சேர்க்கப்பட்டது
 
-// CORS-ஐ இம்போர்ட் செய்து பயன்படுத்தவும்
+// CORS மற்றும் JSON middleware
 app.use(cors());
-
-// JSON மற்றும் URL encoded டேட்டாவை ப்ராசஸ் செய்ய இது அவசியம்
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// உங்கள் ரவுட்டர்களை இங்கே பயன்படுத்தவும்
+app.use("/api", router);
 
 const rawPort = process.env["PORT"];
 
@@ -22,7 +24,7 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-// சர்வரை ஸ்டார்ட் செய்யவும்
+// சர்வர் ஸ்டார்ட்
 app.listen(port, '0.0.0.0', () => {
   logger.info({ port }, "Server listening on port " + port);
 });
